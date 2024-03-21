@@ -1,0 +1,366 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Apartments API",
+    "description": "REST API for managing apartment listings",
+    "author": {
+      "name": "Eduard Shevchenko"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/apartments": {
+      "get": {
+        "summary": "Get apartments",
+        "description": "Retrieve a list of apartments with optional filtering by maximum price",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "maxPrice",
+            "description": "Maximum price filter",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Apartment"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create apartment",
+        "description": "Create a new apartment listing",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "apartment",
+            "description": "Apartment object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewApartment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Apartment created successfully",
+            "schema": {
+              "$ref": "#/definitions/Apartment"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apartments/{id}": {
+      "get": {
+        "summary": "Get apartment by ID",
+        "description": "Retrieve information about a specific apartment by its ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Apartment ID",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/Apartment"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Apartment not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update apartment by ID",
+        "description": "Update information about a specific apartment by its ID",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Apartment ID",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "apartment",
+            "description": "Updated apartment object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Apartment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apartment updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Apartment"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Apartment not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete apartment by ID",
+        "description": "Delete a specific apartment by its ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Apartment ID",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apartment deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Apartment not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apartments/{id}/images": {
+      "post": {
+        "summary": "Upload image for apartment",
+        "description": "Upload a new image for a specific apartment by its ID",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Apartment ID",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "image",
+            "description": "Image URL",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "schema": {
+              "$ref": "#/definitions/Apartment"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Apartment not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apartments/{id}/message": {
+      "post": {
+        "summary": "Send message to apartment owner",
+        "description": "Send a message to the owner of a specific apartment by its ID",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Apartment ID",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "message",
+            "description": "Message content",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Apartment not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Apartment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "address": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ownerEmail": {
+          "type": "string"
+        }
+      }
+    },
+    "NewApartment": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ownerEmail": {
+          "type": "string"
+        }
+      }
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string"
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "SuccessMessage": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
