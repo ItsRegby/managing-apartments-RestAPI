@@ -2,34 +2,181 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Apartments API",
-    "description": "REST API for managing apartment listings",
-    "author": {
-      "name": "Eduard Shevchenko"
-    }
+    "title": "Real Estate API",
+    "description": "API для управління квартирами та користувачами"
   },
-  "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
     "http"
   ],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
   "paths": {
-    "/apartments": {
-      "get": {
-        "summary": "Get apartments",
-        "description": "Retrieve a list of apartments with optional filtering by maximum price",
+    "/register": {
+      "post": {
+        "summary": "Реєстрація нового користувача",
+        "description": "Реєстрація нового користувача з електронною адресою, паролем та роллю.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "query",
-            "name": "maxPrice",
-            "description": "Maximum price filter",
-            "required": false,
-            "type": "integer"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "Електронна адреса користувача"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Пароль користувача"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Роль користувача (owner, realtor, buyer)"
+                }
+              },
+              "required": [
+                "email",
+                "password",
+                "role"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Користувач успішно зареєстрований",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "Повідомлення про успішну реєстрацію"
+                },
+                "token": {
+                  "type": "string",
+                  "description": "JWT токен для автентифікації"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Помилка при реєстрації користувача"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Автентифікація користувача",
+        "description": "Автентифікація користувача за допомогою електронної адреси та пароля.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "Електронна адреса користувача"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Пароль користувача"
+                }
+              },
+              "required": [
+                "email",
+                "password"
+              ]
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Автентифікація успішна",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "Повідомлення про успішну автентифікацію"
+                },
+                "token": {
+                  "type": "string",
+                  "description": "JWT токен для автентифікації"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неправильна електронна адреса або пароль"
+          }
+        }
+      }
+    },
+    "/apartments": {
+      "get": {
+        "summary": "Отримати список квартир",
+        "description": "Отримати список всіх квартир з можливістю фільтрації.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "location",
+            "in": "query",
+            "type": "string",
+            "description": "Розташування квартири"
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "type": "integer",
+            "description": "Максимальна ціна квартири"
+          },
+          {
+            "name": "minRooms",
+            "in": "query",
+            "type": "integer",
+            "description": "Мінімальна кількість кімнат у квартирі"
+          },
+          {
+            "name": "isFeatured",
+            "in": "query",
+            "type": "boolean",
+            "description": "Фільтрувати за прапорцем \"isFeatured\""
+          },
+          {
+            "name": "isTop",
+            "in": "query",
+            "type": "boolean",
+            "description": "Фільтрувати за прапорцем \"isTop\""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список квартир",
             "schema": {
               "type": "array",
               "items": {
@@ -38,24 +185,25 @@
             }
           },
           "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Помилка при отриманні списку квартир"
           }
         }
       },
       "post": {
-        "summary": "Create apartment",
-        "description": "Create a new apartment listing",
-        "consumes": [
+        "summary": "Створити нову квартиру",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Створити нову квартиру з вказаними даними.",
+        "produces": [
           "application/json"
         ],
         "parameters": [
           {
+            "name": "body",
             "in": "body",
-            "name": "apartment",
-            "description": "Apartment object",
             "required": true,
             "schema": {
               "$ref": "#/definitions/NewApartment"
@@ -64,223 +212,107 @@
         ],
         "responses": {
           "201": {
-            "description": "Apartment created successfully",
+            "description": "Квартира успішно створена",
             "schema": {
               "$ref": "#/definitions/Apartment"
             }
           },
           "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Помилка при створенні квартири"
           }
         }
       }
     },
     "/apartments/{id}": {
       "get": {
-        "summary": "Get apartment by ID",
-        "description": "Retrieve information about a specific apartment by its ID",
+        "summary": "Отримати інформацію про квартиру",
+        "description": "Отримати інформацію про квартиру за її ідентифікатором.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
-            "description": "Apartment ID",
-            "required": true,
-            "type": "integer"
+            "in": "path",
+            "type": "integer",
+            "description": "Ідентифікатор квартири"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Інформація про квартиру",
             "schema": {
               "$ref": "#/definitions/Apartment"
             }
           },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
           "404": {
-            "description": "Apartment not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Квартира не знайдена"
+          },
+          "400": {
+            "description": "Помилка при отриманні інформації про квартиру"
           }
         }
       },
       "put": {
-        "summary": "Update apartment by ID",
-        "description": "Update information about a specific apartment by its ID",
-        "consumes": [
+        "summary": "Оновити інформацію про квартиру",
+        "description": "Оновити інформацію про квартиру за її ідентифікатором.",
+        "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
-            "description": "Apartment ID",
-            "required": true,
-            "type": "integer"
+            "in": "path",
+            "type": "integer",
+            "description": "Ідентифікатор квартири"
           },
           {
+            "name": "body",
             "in": "body",
-            "name": "apartment",
-            "description": "Updated apartment object",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Apartment"
+              "$ref": "#/definitions/UpdateApartment"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Apartment updated successfully",
+            "description": "Інформація про оновлену квартиру",
             "schema": {
               "$ref": "#/definitions/Apartment"
             }
           },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
           "404": {
-            "description": "Apartment not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Квартира не знайдена"
+          },
+          "400": {
+            "description": "Помилка при оновленні інформації про квартиру"
           }
         }
       },
       "delete": {
-        "summary": "Delete apartment by ID",
-        "description": "Delete a specific apartment by its ID",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Apartment ID",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Apartment deleted successfully",
-            "schema": {
-              "$ref": "#/definitions/Message"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Apartment not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/apartments/{id}/images": {
-      "post": {
-        "summary": "Upload image for apartment",
-        "description": "Upload a new image for a specific apartment by its ID",
-        "consumes": [
+        "summary": "Видалити квартиру",
+        "description": "Видалити квартиру за її ідентифікатором.",
+        "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
-            "description": "Apartment ID",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "body",
-            "name": "image",
-            "description": "Image URL",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Image"
-            }
+            "in": "path",
+            "type": "integer",
+            "description": "Ідентифікатор квартири"
           }
         ],
         "responses": {
           "200": {
-            "description": "Image uploaded successfully",
-            "schema": {
-              "$ref": "#/definitions/Apartment"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Квартира успішно видалена"
           },
           "404": {
-            "description": "Apartment not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/apartments/{id}/message": {
-      "post": {
-        "summary": "Send message to apartment owner",
-        "description": "Send a message to the owner of a specific apartment by its ID",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Apartment ID",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "body",
-            "name": "message",
-            "description": "Message content",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Message"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Message sent successfully",
-            "schema": {
-              "$ref": "#/definitions/SuccessMessage"
-            }
+            "description": "Квартира не знайдена"
           },
           "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Apartment not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "Помилка при видаленні квартири"
           }
         }
       }
@@ -291,22 +323,43 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Ідентифікатор квартири"
         },
         "address": {
-          "type": "string"
+          "type": "string",
+          "description": "Адреса квартири"
         },
         "price": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Ціна квартири"
+        },
+        "rooms": {
+          "type": "integer",
+          "description": "Кількість кімнат у квартирі"
         },
         "images": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Масив посилань на зображення квартири"
         },
         "ownerEmail": {
-          "type": "string"
+          "type": "string",
+          "description": "Електронна адреса власника квартири"
+        },
+        "views": {
+          "type": "integer",
+          "description": "Кількість переглядів квартири"
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Прапорець, що вказує на те, чи є квартира у списку рекомендованих"
+        },
+        "isTop": {
+          "type": "boolean",
+          "description": "Прапорець, що вказує на те, чи є квартира в топі оголошень"
         }
       }
     },
@@ -314,51 +367,77 @@
       "type": "object",
       "properties": {
         "address": {
-          "type": "string"
+          "type": "string",
+          "description": "Адреса квартири"
         },
         "price": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Ціна квартири"
+        },
+        "rooms": {
+          "type": "integer",
+          "description": "Кількість кімнат у квартирі"
         },
         "images": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Масив посилань на зображення квартири"
         },
         "ownerEmail": {
-          "type": "string"
+          "type": "string",
+          "description": "Електронна адреса власника квартири"
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Прапорець, що вказує на те, чи є квартира у списку рекомендованих"
+        },
+        "isTop": {
+          "type": "boolean",
+          "description": "Прапорець, що вказує на те, чи є квартира в топі оголошень"
         }
-      }
+      },
+      "required": [
+        "address",
+        "price",
+        "rooms",
+        "ownerEmail"
+      ]
     },
-    "Image": {
+    "UpdateApartment": {
       "type": "object",
       "properties": {
-        "image": {
-          "type": "string"
-        }
-      }
-    },
-    "Message": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "SuccessMessage": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "Error": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
+        "address": {
+          "type": "string",
+          "description": "Нова адреса квартири"
+        },
+        "price": {
+          "type": "integer",
+          "description": "Нова ціна квартири"
+        },
+        "rooms": {
+          "type": "integer",
+          "description": "Нова кількість кімнат у квартирі"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Новий масив посилань на зображення квартири"
+        },
+        "ownerEmail": {
+          "type": "string",
+          "description": "Нова електронна адреса власника квартири"
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Нове значення для прапорця, що вказує на те, чи є квартира у списку рекомендованих"
+        },
+        "isTop": {
+          "type": "boolean",
+          "description": "Нове значення для прапорця, що вказує на те, чи є квартира в топі оголошень"
         }
       }
     }

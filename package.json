@@ -10,7 +10,9 @@
   "author": "Eduard (REGBY)",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "express": "^4.19.0",
+    "jsonwebtoken": "^9.0.2",
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
